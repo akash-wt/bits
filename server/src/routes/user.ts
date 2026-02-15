@@ -6,7 +6,7 @@ const router = Router()
 
 router.post("/check", async (req, res) => {
     try {
-        const nonce = crypto.randomUUID();
+        const nonce = crypto.randomUUID().toString();
         const parseBody = UserSchema.safeParse(req.body);
         if (!parseBody.success) {
             return res.status(400).json({ msg: "Incorrect inputs" });
@@ -14,29 +14,31 @@ router.post("/check", async (req, res) => {
 
         const { publicKey, name } = parseBody.data;
 
-        const userExist = prisma.user.findUnique({
+        const userExist = await prisma.user.findUnique({
             where: {
                 pubKey: publicKey
             }
         })
 
-        console.log(userExist);
-
-        if (!userExist) {
-            const user = prisma.user.create({
+        if (!userExist?.id || !userExist.pubKey) {
+            await prisma.user.create({
                 data: {
                     pubKey: publicKey,
                     nonce
                 }
             })
         }
-        // const updateUser= prisma.user.update({
-        //     where:{
-        //         id:userExist
-        //     }
-        // })
 
-        res.json({ nonce });
+        const updateUser = prisma.user.update({
+            where: {
+                id: userExist?.id!
+            },
+            data: {
+                nonce
+            }
+        })
+
+        res.json({ nonce, userExist });
     } catch (e: any) {
         console.log(e);
         throw new Error("user/nonce failed", e)
