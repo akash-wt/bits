@@ -19,7 +19,7 @@ export default function TabLayout() {
         options={{
           title: "Chats",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chats" size={size} color={color} />
+            <Ionicons name="chatbubbles" size={size} color={color} />
           ),
         }}
       />
@@ -28,7 +28,7 @@ export default function TabLayout() {
         options={{
           title: "Inbox",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="message-inbox" size={size} color={color} />
+            <Ionicons name="mail" size={size} color={color} />
           ),
         }}
       />
