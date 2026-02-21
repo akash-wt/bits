@@ -24,7 +24,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="indox"
+        name="inbox"
         options={{
           title: "Inbox",
           tabBarIcon: ({ color, size }) => (

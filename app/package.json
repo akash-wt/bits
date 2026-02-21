@@ -9,6 +9,9 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@solana-mobile/mobile-wallet-adapter-protocol-web3js": "^2.2.5",
+    "axios": "^1.13.5",
+    "react-dom": "^19.2.4",
     "@expo/vector-icons": "^15.0.3",
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",
