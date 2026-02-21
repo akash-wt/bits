@@ -1,12 +1,12 @@
 import { View, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
 
-export default function ChatScreen() {
+export default function ChatDetail() {
+  const { id } = useLocalSearchParams();
+
   return (
-    <SafeAreaView>
-      <View>
-        <Text>your all chats will apear here</Text>
-      </View>
-    </SafeAreaView>
+    <View>
+      <Text>Chat ID: {id}</Text>
+    </View>
   );
 }
