@@ -10,48 +10,86 @@ import {
   StatusBar,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { useChatStore } from "@/stores/chats";
+import { ChatMessage, useChatStore } from "@/stores/chats";
 import { SafeAreaView } from "react-native-safe-area-context";
 import getRandomUuid from "@/lib/UUID";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { shortenKey } from "@/lib/trimString";
+import { currentUser } from "@/config";
+import { socket } from "@/socket/socket";
+import { useEffect } from "react";
 
 export default function ChatDetail() {
   const { reciverKey } = useLocalSearchParams();
   const { chats, addMessage } = useChatStore();
   const router = useRouter();
-  const chatRoomId = String(reciverKey);
 
   const [input, setInput] = useState("");
   const flatListRef = useRef<FlatList>(null);
 
-  const room = chatRoomId ? chats[chatRoomId] : undefined;
-  const messages = room?.messages ?? [];
+  const reciverData = reciverKey ? chats[reciverKey.toString()] : undefined;
+  const messages = reciverData?.messages ?? [];
 
-  const currentUser = "user2";
+  useEffect(() => {
+    // fetch all messges when we open chat
+    const data = socket.emit("get_messages", {
+      senderKey: currentUser,
+      reciverKey,
+    });
+    
+    // hydrate store with history
+    socket.on("message_history", (messages: ChatMessage[]) => {
+      messages.forEach((msg) => {
+        useChatStore.getState().addMessage(reciverKey.toString(), msg);
+      });
+    });
+
+    // listen for new incoming messages while chat is open
+    socket.on("receive_message", (msg: ChatMessage) => {
+      useChatStore.getState().addMessage(reciverKey.toString(), msg);
+    });
+    return () => {
+      socket.off("message_history");
+      socket.off("receive_message");
+    };
+  }, [reciverKey]);
 
   const sendMessage = () => {
+    console.log(reciverKey);
+    console.log(currentUser);
+    console.log(input);
+    
+    
+    
     if (!reciverKey) {
-      console.log("no chat room found while sending message");
+      console.log("no reciverKey found while sending message");
       return;
     }
-    
+    if (!currentUser) {
+      console.log("no  currentUser found while sending message");
+      return;
+    }
+    if (input == "") {
+      return;
+    }
 
-    addMessage(chatRoomId, {
+    const message: ChatMessage = {
       id: getRandomUuid(),
       text: input.trim(),
       senderKey: currentUser,
-      reciverKey: "user1",
+      reciverKey: reciverKey.toString(),
       createdAt: Date.now(),
       status: "sent",
-    });
+    };
 
+    addMessage(reciverKey.toString(), message); // added to local storage
     setInput("");
-
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 50);
+
+    socket.emit("send_message", message); // sent to server for broadcast
   };
 
   return (

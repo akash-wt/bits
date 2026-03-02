@@ -29,7 +29,7 @@ export default function RootLayout() {
   }
 
   if (!fontsLoaded) {
-    return null; // wait until font loads
+    return null; 
   }
 
   return (

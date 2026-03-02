@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { mmkvStorage } from "../lib/storage";
+import { currentUser } from "@/config";
 
 export interface ChatMessage {
   id: string;
@@ -38,7 +39,7 @@ export const useChatStore = create<ChatStore>()(
 
         const isIncoming =
           message.status !== "read" &&
-          message.senderKey !== "user2"; // current user
+          message.senderKey !== currentUser; 
 
         return {
           chats: {

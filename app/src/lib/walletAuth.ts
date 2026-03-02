@@ -3,7 +3,7 @@ import {
     Web3MobileWallet,
 } from "@solana-mobile/mobile-wallet-adapter-protocol-web3js";
 import axios from "axios"
-import { APP_IDENTITY, BACKEND_URL_EMULATER, BACKEND_URL_USB } from "../config";
+import { APP_IDENTITY, BACKEND_URL } from "../config";
 import { mmkvStorage } from "@/lib/storage";
 // import * as BufferModule from "buffer"
 // window.Buffer = BufferModule.Buffer;
@@ -67,7 +67,7 @@ export async function checkUserExist() {
         }
 
         // 2. nonce from server. 
-        const nonceResponse = await axios.post(`${BACKEND_URL_EMULATER}/user/check`, {
+        const nonceResponse = await axios.post(`${BACKEND_URL}/user/check`, {
             "publicKey": connectWalletresponse.address
         })
 
@@ -86,7 +86,7 @@ export async function checkUserExist() {
 
         const signatureBase64 = Buffer.from(signedMessages[0]).toString("base64")
 
-        const JWTResponse = await axios.post(`${BACKEND_URL_EMULATER}/auth/verify/nonce`, {
+        const JWTResponse = await axios.post(`${BACKEND_URL}/auth/verify/nonce`, {
             publicKey: connectWalletresponse.address,
             signature: signatureBase64,
             signedMessage: message

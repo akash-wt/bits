@@ -6,15 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-model Inbox {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  message   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User     @relation(fields: [userId], references: [id])
-}
-
 model User {
   id        String   @id @default(uuid())
   pubKey    String   @unique
@@ -22,5 +13,28 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   nonce     String
-  Inbox     Inbox[]
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+model Message {
+  id         String        @id @default(uuid())
+  text       String
+  senderKey  String
+  reciverKey String
+  status     MessageStatus @default(SENT)
+  createdAt  DateTime      @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderKey], references: [pubKey])
+  receiver User @relation("ReceivedMessages", fields: [reciverKey], references: [pubKey])
+
+  @@index([senderKey, reciverKey])
+  @@index([reciverKey, status])
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
 }
