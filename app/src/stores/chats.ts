@@ -22,7 +22,7 @@ interface ChatStore {
   chats: Record<string, ChatRoomState>;
   addMessage: (reciverKey: string, message: ChatMessage) => void;
   //   markMessageAsRead: (roomId: string, messageId: string) => void;
-  //   markRoomAsRead: (roomId: string) => void;
+  markRoomAsRead: (roomId: string) => void;
   clearRoom: (reciverKey: string) => void;
 }
 
@@ -86,27 +86,27 @@ export const useChatStore = create<ChatStore>()(
     //       };
     //     }),
 
-    //   markRoomAsRead: (roomId) =>
-    //     set((state) => {
-    //       const room = state.chats[roomId];
-    //       if (!room) return state;
+    markRoomAsRead: (roomId) =>
+      set((state) => {
+        const room = state.chats[roomId];
+        if (!room) return state;
 
-    //       const updatedMessages = room.messages.map((msg) =>
-    //         msg.status !== "read"
-    //           ? { ...msg, status: "read" }
-    //           : msg
-    //       );
+        const updatedMessages = room.messages.map((msg) =>
+          msg.status !== "read"
+            ? { ...msg, status: "read" as MessageStatus }
+            : msg
+        );
 
-    //       return {
-    //         chats: {
-    //           ...state.chats,
-    //           [roomId]: {
-    //             messages: updatedMessages,
-    //             unreadCount: 0,
-    //           },
-    //         },
-    //       };
-    //     }),
+        return {
+          chats: {
+            ...state.chats,
+            [roomId]: {
+              messages: updatedMessages,
+              unreadCount: 0,
+            },
+          },
+        };
+      }),
 
     clearRoom: (reciverKey) =>
       set((state) => {

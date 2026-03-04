@@ -18,6 +18,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { shortenKey } from "@/lib/trimString";
 import { PublicKey } from "@solana/web3.js";
 import { socket } from "@/socket/socket";
+import { currentUser } from "@/config";
 
 export default function ChatScreen() {
   const router = useRouter();
@@ -44,6 +45,11 @@ export default function ChatScreen() {
       socket.io.engine.on("upgrade", (transport) => {
         setTransport(transport.name);
       });
+
+      // 1. register user to server
+      socket.emit("register", currentUser);
+
+      socket.emit("get_everything",currentUser);
     }
 
     function onDisconnect() {
@@ -296,19 +302,6 @@ export default function ChatScreen() {
       >
         <Feather name="message-circle" size={24} color="white" />
       </TouchableOpacity>
-
-      {/*  socket demo testing  */}
-      {/* <View
-        style={{
-          flex: 1,
-          backgroundColor: "#fff",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text>Status: {isConnected ? "connected" : "disconnected"}</Text>
-        <Text>Transport: {transport}</Text>
-      </View> */}
     </SafeAreaView>
   );
 }

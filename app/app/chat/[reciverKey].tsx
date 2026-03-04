@@ -22,7 +22,7 @@ import { useEffect } from "react";
 
 export default function ChatDetail() {
   const { reciverKey } = useLocalSearchParams();
-  const { chats, addMessage } = useChatStore();
+  const { chats, addMessage, markRoomAsRead } = useChatStore();
   const router = useRouter();
 
   const [input, setInput] = useState("");
@@ -32,9 +32,6 @@ export default function ChatDetail() {
   const messages = reciverData?.messages ?? [];
 
   useEffect(() => {
-    // 1. register user too server
-    socket.emit("register", currentUser);
-
     // fetch all messges when we open chat
     const data = socket.emit("get_messages", {
       senderKey: currentUser,
@@ -46,12 +43,20 @@ export default function ChatDetail() {
       messages.forEach((msg) => {
         useChatStore.getState().addMessage(reciverKey.toString(), msg);
       });
+
+      markRoomAsRead(reciverKey.toString());
     });
 
     // listen for new incoming messages while chat is open
     socket.on("receive_message", (msg: ChatMessage) => {
-      useChatStore.getState().addMessage(reciverKey.toString(), msg);
+      const roomKey =
+        msg.senderKey === currentUser
+          ? msg.reciverKey // outgoing
+          : msg.senderKey; // incoming
+
+      useChatStore.getState().addMessage(roomKey, msg);
     });
+
     return () => {
       socket.off("message_history");
       socket.off("receive_message");
@@ -126,7 +131,7 @@ export default function ChatDetail() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => {
-          const isMe = item.senderKey === currentUser;          
+          const isMe = item.senderKey === currentUser;
 
           return (
             <View
