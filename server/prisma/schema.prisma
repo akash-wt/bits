@@ -14,8 +14,7 @@ model User {
   updatedAt DateTime @updatedAt
   nonce     String
 
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  sentMessages Message[] @relation("SentMessages")
 }
 
 model Message {
@@ -25,9 +24,7 @@ model Message {
   reciverKey String
   status     MessageStatus @default(SENT)
   createdAt  DateTime      @default(now())
-
-  sender   User @relation("SentMessages", fields: [senderKey], references: [pubKey])
-  receiver User @relation("ReceivedMessages", fields: [reciverKey], references: [pubKey])
+  sender   User   @relation("SentMessages", fields: [senderKey], references: [pubKey])
 
   @@index([senderKey, reciverKey])
   @@index([reciverKey, status])

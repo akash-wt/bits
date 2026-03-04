@@ -32,12 +32,15 @@ export default function ChatDetail() {
   const messages = reciverData?.messages ?? [];
 
   useEffect(() => {
+    // 1. register user too server
+    socket.emit("register", currentUser);
+
     // fetch all messges when we open chat
     const data = socket.emit("get_messages", {
       senderKey: currentUser,
       reciverKey,
     });
-    
+
     // hydrate store with history
     socket.on("message_history", (messages: ChatMessage[]) => {
       messages.forEach((msg) => {
@@ -56,12 +59,6 @@ export default function ChatDetail() {
   }, [reciverKey]);
 
   const sendMessage = () => {
-    console.log(reciverKey);
-    console.log(currentUser);
-    console.log(input);
-    
-    
-    
     if (!reciverKey) {
       console.log("no reciverKey found while sending message");
       return;
@@ -129,7 +126,7 @@ export default function ChatDetail() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => {
-          const isMe = item.senderId === currentUser;
+          const isMe = item.senderKey === currentUser;          
 
           return (
             <View

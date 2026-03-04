@@ -37,9 +37,12 @@ export const useChatStore = create<ChatStore>()(
           unreadCount: 0,
         };
 
+        const alreadyExists = room.messages.some((m) => m.id === message.id);
+        if (alreadyExists) return state;
+
         const isIncoming =
           message.status !== "read" &&
-          message.senderKey !== currentUser; 
+          message.senderKey !== currentUser;
 
         return {
           chats: {

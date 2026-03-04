@@ -22,11 +22,25 @@ app.use(express.json());
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/user", userRouter)
 
+const onlineUsers = new Map<string, string>();
+
 io.on("connection", (socket) => {
   console.log("a user connected! ", socket.id);
 
+  //user register their key to connect
+  socket.on("register", (pubKey: string) => {
+    onlineUsers.set(pubKey, socket.id);
+    console.log("registered", pubKey, socket.id);
+  });
+
   socket.on("disconnect", () => {
     console.log("a use disconnected ", socket.id);
+
+    onlineUsers.forEach((key) => {
+      if (key === socket.id) {
+        onlineUsers.delete(key)
+      }
+    })
   })
 
   socket.on("connect_error", (err) => {
@@ -37,22 +51,27 @@ io.on("connection", (socket) => {
     console.log(message);
 
     // 1. saved to DB
-    const saved = await prisma.message.create({
-      data: {
+    const saved = await prisma.message.upsert({
+      where: { id: message.id },
+      update: {},
+      create: {
         id: message.id,
         text: message.text,
         senderKey: message.senderKey,
         reciverKey: message.reciverKey
       }
     })
-    console.log("saved data",saved);
-    
+
+    console.log("saved data", saved);
 
     // 2. Forward to receiver if online
-    io.to(message.reciverKey).emit("receive_message", {
-      ...saved,
-      status: "delivered"
-    })
+    const reciverSocketId = onlineUsers.get(message.reciverKey);
+    if (reciverSocketId) {
+      io.to(reciverSocketId).emit("receive_message", {
+        ...saved,
+        status: "delivered"
+      })
+    }
 
     // 3. Update status to DELIVERED in DB
     await prisma.message.update({
@@ -66,12 +85,11 @@ io.on("connection", (socket) => {
       reciverKey: message.reciverKey
     });
 
-
   })
 
   socket.on("get_messages", async ({ senderKey, reciverKey }) => {
     // console.log("into get meassage");
-    
+
     const messages = await prisma.message.findMany({
       where: {
         OR: [
