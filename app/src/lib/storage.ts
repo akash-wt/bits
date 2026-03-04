@@ -17,3 +17,18 @@ export const mmkvStorage = {
         storage.remove(key);
     },
 };
+
+export const roomsCache = {
+    save: (rooms: any[]) => {
+        storage.set("rooms_cache", JSON.stringify(rooms));
+    },
+
+    load: (): any[] => {
+        const raw = storage.getString("rooms_cache");
+        return raw ? JSON.parse(raw) : [];
+    },
+
+    clear: () => {
+        storage.remove("rooms_cache");
+    }
+};

@@ -11,7 +11,7 @@ export interface ChatMessage {
   createdAt: number; // store as timestamp
   status: MessageStatus
 }
-type MessageStatus = "sent" | "delivered" | "read";
+export type MessageStatus = "sent" | "delivered" | "read";
 
 interface ChatRoomState {
   messages: ChatMessage[];
@@ -121,3 +121,4 @@ export const useChatStore = create<ChatStore>()(
   })
 
 );
+

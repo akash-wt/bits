@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useChatStore } from "@/stores/chats";
 import { ChatMessage } from "@/stores/chats";
-import { mmkvStorage } from "@/lib/storage";
+import { mmkvStorage, roomsCache } from "@/lib/storage";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { shortenKey } from "@/lib/trimString";
 import { PublicKey } from "@solana/web3.js";
@@ -32,6 +32,13 @@ export default function ChatScreen() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
+  const [rooms, setRooms] = useState<
+    {
+      roomId: string;
+      lastMessage: ChatMessage;
+      unreadCount: number;
+    }[]
+  >(() => roomsCache.load());
 
   useEffect(() => {
     if (socket.connected) {
@@ -49,7 +56,21 @@ export default function ChatScreen() {
       // 1. register user to server
       socket.emit("register", currentUser);
 
-      socket.emit("get_everything",currentUser);
+      socket.emit("get_everything", currentUser);
+
+      socket.on(
+        "all_talked_users",
+        (data: { roomId: string; lastMessage: ChatMessage }[]) => {
+          const newRooms = data.map(({ roomId, lastMessage }) => ({
+            roomId,
+            lastMessage,
+            unreadCount:
+              useChatStore.getState().chats[roomId]?.unreadCount ?? 0,
+          }));
+          setRooms(newRooms); //  triggers re-render
+          roomsCache.save(newRooms); // cache for next launch
+        },
+      );
     }
 
     function onDisconnect() {
@@ -66,26 +87,13 @@ export default function ChatScreen() {
     };
   }, []);
 
-  // Converts rooms object → array
-  const rooms = Object.entries(chats).map(([roomId, room]) => {
-    const lastMessage = room.messages[room.messages.length - 1];
-
-    return {
-      roomId,
-      lastMessage,
-      unreadCount: room.unreadCount,
-    };
-  });
-
   const totalUnread = rooms.reduce((sum, room) => sum + room.unreadCount, 0);
 
   const filtered = rooms.filter((room) => {
     const matchSearch =
       room.roomId.toLowerCase().includes(search.toLowerCase()) ||
-      room.lastMessage?.text.toLowerCase().includes(search.toLowerCase());
-    if (filter === "unread") {
-      return matchSearch && room.unreadCount > 0;
-    }
+      room.lastMessage?.text?.toLowerCase().includes(search.toLowerCase());
+    if (filter === "unread") return matchSearch && room.unreadCount > 0;
     return matchSearch;
   });
 

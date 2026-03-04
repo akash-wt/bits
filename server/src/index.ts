@@ -6,6 +6,7 @@ import { authRouter } from './routes/auth.js';
 import { userRouter } from './routes/user.js';
 import { create } from 'domain';
 import { prisma } from './lib/prisma.js';
+import { da } from 'zod/locales';
 
 const app = express()
 const server = http.createServer(app)
@@ -101,6 +102,38 @@ io.on("connection", (socket) => {
     });
 
     socket.emit("message_history", messages);
+  });
+
+  socket.on("get_everything", async (userPubkey) => {
+    const all_data = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderKey: userPubkey },
+          { reciverKey: userPubkey }
+        ]
+      },
+      orderBy: { createdAt: "desc" } // latest first
+    });
+
+    const roomMap = new Map<string, typeof all_data[0]>();
+
+    all_data.forEach((msg) => {
+      const roomKey = msg.senderKey === userPubkey
+        ? msg.reciverKey!
+        : msg.senderKey;
+
+      // since ordered by desc, first occurrence = latest message
+      if (!roomMap.has(roomKey)) {
+        roomMap.set(roomKey, msg);
+      }
+    });
+
+    const result = Array.from(roomMap.entries()).map(([roomId, lastMsg]) => ({
+      roomId,
+      lastMessage: lastMsg
+    }));
+
+    socket.emit("all_talked_users", result);
   });
 })
 
