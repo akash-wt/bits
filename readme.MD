@@ -2,13 +2,17 @@
 
 A decentralized peer-to-peer messaging application built on Solana blockchain with real-time communication.
 
-![Alt text](./app/assets/1.png)
-![Alt text](./app/assets/2.png)
-![Alt text](./app/assets/3.png)
-![Alt text](./app/assets/4.png)
-![Alt text](./app/assets/5.png)
-
 [▶ Watch Demo](https://drive.google.com/file/d/1Tat8u-YRJ8IhkFy5VgxBGzPFwt3tIYgMuRR-3abSoqM/view?usp=sharing)
+
+<table>
+  <tr>
+    <td><img src="./app/assets/1.png" width="180"/></td>
+    <td><img src="./app/assets/2.png" width="180"/></td>
+    <td><img src="./app/assets/3.png" width="180"/></td>
+    <td><img src="./app/assets/4.png" width="180"/></td>
+    <td><img src="./app/assets/5.png" width="180"/></td>
+  </tr>
+</table>
 
 ## Overview
 
