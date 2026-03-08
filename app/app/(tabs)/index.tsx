@@ -56,6 +56,8 @@ export default function ChatScreen() {
       // 1. register user to server
       socket.emit("register", currentUser);
 
+      console.log(currentUser);
+      
       socket.emit("get_everything", currentUser);
 
       socket.on(

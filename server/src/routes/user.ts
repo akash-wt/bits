@@ -6,7 +6,7 @@ const router = Router()
 
 router.post("/check", async (req, res) => {
     try {
-        console.log("got call heer");
+        console.log("got call here");
 
         const nonce = crypto.randomUUID().toString();
         const parseBody = UserSchema.safeParse(req.body);

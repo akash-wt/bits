@@ -113,6 +113,9 @@ export async function checkUserExist() {
         }
         )
 
+        console.log(JWTResponse);
+        
+
         mmkvStorage.setItem("auth_user", JSON.stringify({
             publicKey: connectWalletresponse.address,
             jwt: JWTResponse.data.token,

@@ -6,6 +6,7 @@ import { prisma } from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 import { JWT_PASSWORD } from "../config.js";
 import crypto from "crypto";
+import { PublicKey } from "@solana/web3.js";
 
 const router = Router()
 
@@ -19,7 +20,7 @@ router.post("/verify/nonce", async (req, res) => {
         console.log(parseBody.data);
         const { publicKey, signedMessage, signature } = parseBody.data;
 
-        const publicKeyBytes = Buffer.from(publicKey, "base64");
+        const publicKeyBytes = new PublicKey(publicKey).toBytes();
         const messageBytes = new TextEncoder().encode(signedMessage);
         const signatureBytes = Buffer.from(signature, "base64");
 
@@ -52,7 +53,7 @@ router.post("/verify/nonce", async (req, res) => {
 
         // rotate nonce to prevent replay
         const newNonce = crypto.randomUUID();
-        
+
         await prisma.user.update({ where: { id: user.id }, data: { nonce: newNonce } });
 
         return res.json({ verified: true, token, user: { id: user.id, pubKey: user.pubKey, name: user.name } });
