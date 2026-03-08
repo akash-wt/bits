@@ -1,11 +1,15 @@
 # Bits
 
 A decentralized peer-to-peer messaging application built on Solana blockchain with real-time communication.
+
 ![Alt text](./app/assets/1.png)
 ![Alt text](./app/assets/2.png)
 ![Alt text](./app/assets/3.png)
 ![Alt text](./app/assets/4.png)
 ![Alt text](./app/assets/5.png)
+
+[▶ Watch Demo](https://drive.google.com/file/d/1Tat8u-YRJ8IhkFy5VgxBGzPFwt3tIYgMuRR-3abSoqM/view?usp=sharing)
+
 ## Overview
 
 Bits is a secure messaging platform that uses Solana wallet authentication for user identity. Users connect with their Solana wallet and can chat with anyone using their public key. All messages are stored securely with real-time delivery powered by WebSockets.
