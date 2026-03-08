@@ -13,6 +13,11 @@
     },
     "production": {
       "autoIncrement": true
+    },
+    "dappstore": {
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {

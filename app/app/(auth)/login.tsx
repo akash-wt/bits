@@ -1,9 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StatusBar,
-} from "react-native";
+import { View, Text, TouchableOpacity, StatusBar } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,11 +22,7 @@ export default function LoginScreen() {
 
       console.log("result =>  ", result?.data);
 
-      if (
-        !result?.data.token &&
-        !result?.data.user.pubKey &&
-        !result?.data.verified
-      ) {
+      if (!result?.data.verified) {
         throw new Error("Authentication failed");
       }
 
@@ -96,7 +87,7 @@ export default function LoginScreen() {
                   color: "#ffffff",
                   fontSize: 21,
                   letterSpacing: 2,
-                  paddingVertical:20,
+                  paddingVertical: 20,
                   fontFamily: "VT323_400Regular",
                 }}
               >

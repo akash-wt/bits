@@ -221,7 +221,6 @@ export default function ChatScreen() {
               onPress={() => {
                 try {
                   const trimmed = newChatPubKey.trim();
-                  if (!trimmed) return;
                   const chatPubKey = new PublicKey(trimmed);
 
                   router.push({

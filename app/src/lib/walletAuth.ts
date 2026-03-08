@@ -5,21 +5,29 @@ import {
 import axios from "axios"
 import { APP_IDENTITY, BACKEND_URL } from "../config";
 import { mmkvStorage } from "@/lib/storage";
-// import * as BufferModule from "buffer"
-// window.Buffer = BufferModule.Buffer;
+import { PublicKey } from "@solana/web3.js";
 
 async function connectWallet() {
     return await transact(async (wallet: Web3MobileWallet) => {
         try {
             const authorizationResult = await wallet.authorize({
-                chain: 'solana:devnet',
+                chain: 'solana:mainnet',
                 identity: APP_IDENTITY,
             });
             if (!authorizationResult.accounts[0].address) {
                 throw new Error("no address returned from wallet")
             }
+
+            const base64Address = authorizationResult.accounts[0].address;
+            if (!base64Address) throw new Error("no address returned from wallet");
+
+            // Convert base64 → base58
+            const publicKey = new PublicKey(Buffer.from(base64Address, "base64"));
+
+            console.log(publicKey.toBase58());
+
             return {
-                address: authorizationResult.accounts[0].address
+                address: publicKey.toBase58()
             };
         } catch (e: any) {
             console.log(e);
@@ -30,9 +38,10 @@ async function connectWallet() {
 export async function signNonceMessage(nonce: string, address: string) {
     return await transact(async (wallet: Web3MobileWallet) => {
         try {
+            console.log(address);
 
             const authorizationResult = await wallet.authorize({
-                chain: 'solana:devnet',
+                chain: 'solana:mainnet',
                 identity: APP_IDENTITY,
             });
 
@@ -42,10 +51,17 @@ export async function signNonceMessage(nonce: string, address: string) {
                 message.split('').map(c => c.charCodeAt(0)),
             );
 
+            const base64Address = Buffer.from(
+                new PublicKey(address).toBytes()
+            ).toString("base64");
+
             const signedMessages = await wallet.signMessages({
-                addresses: [address],
+                addresses: [base64Address], // base64 
                 payloads: [messageBuffer]
-            })
+            });
+
+            console.log("signNonceMessage", signNonceMessage);
+
 
             return signedMessages;
 
@@ -61,6 +77,8 @@ export async function checkUserExist() {
 
         // 1. For checking if user exist or not if yes we get nonce if not we create user then send nonce.
         const connectWalletresponse = await connectWallet();
+        // console.log("hi there", connectWalletresponse?.address);
+
 
         if (!connectWalletresponse?.address) {
             throw new Error("wallet doesn't retuned address");
@@ -70,6 +88,7 @@ export async function checkUserExist() {
         const nonceResponse = await axios.post(`${BACKEND_URL}/user/check`, {
             "publicKey": connectWalletresponse.address
         })
+        // console.log("nonceResponse", nonceResponse.data);
 
         const message = `Please sign this message to verify your identity. Nonce: ${nonceResponse.data.nonce}`;
 
